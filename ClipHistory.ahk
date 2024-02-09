@@ -1,5 +1,4 @@
 ﻿#Requires AutoHotkey v2.0
-#include <gui>
 #Include <ScriptObj\scriptobj>
 #include <sift>
 #include <NotifyV2>
@@ -11,7 +10,7 @@ Notify.Default.BDFont := 'Arial Black'
 
 script := {
 	        base : ScriptObj(),
-			hwnd : mGui.Hwnd,
+			hwnd : 0,
 	     version : "1.0.0",
 	      author : "the-Automator",
 	       email : "joe@the-automator.com",
@@ -25,8 +24,7 @@ script := {
 	  donateLink : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6",
 }
 
-#include <ConfigGui>
-
+DSstats := (IniRead(script.config,'Settings','DisplayStart',1)?'':' hide') ; hide/show on start clip history by default
 MaxResults         := 10 ;maximum number of results to display
 MinChar            := 3 ; minimer characters after suggestion triggers 
 OffsetX            := 8 ;offset in caret position in X axis
@@ -38,13 +36,31 @@ SuggestTriggerKeys := '{enter}'
 LVS_NOSCROLL       := 0x2000 
 VScroll            := 0x200000
 
+#include <gui>
+#include <ConfigGui>
+script.Hwnd := mGui.Hwnd
 ; if autostartup := IniRead(script.config,'Auto','Startup',false)
 ; 	tray.check('Run with Start up')
 ;script.Autostart(autostartup+0)
+
+
+
+
+
+ConfigGui.TrayClipWatch := 'Toggle ClipWatch Press 			' HKToString(ConfigGui.WatchClipHK)
+ConfigGui.TrayClipSugg  := 'Toggle Clip Suggestions Press	' HKToString(ConfigGui.OldShowHK)
+ConfigGui.TrayClipUI    := 'Show ClipHistory UI Press		' HKToString(ConfigGui.OldCSHK)
+
 tray := A_TrayMenu
 tray.Delete()
 tray.Add("About",(*) => Script.About())
 tray.Add("Donate",(*) => Run(script.donateLink))
+tray.Add()
+
+tray.add(ConfigGui.TrayClipWatch , (*) => ConfigGui.Show())
+tray.add(ConfigGui.TrayClipSugg  , (*) => ConfigGui.Show())
+tray.add(ConfigGui.TrayClipUI    , (*) => ConfigGui.Show())
+
 tray.Add()
 tray.Add('Watch Clipboard',(*) => a_now)
 tray.Add('Show Suggestions',onofftoggle)
@@ -52,8 +68,8 @@ tray.Check('Show Suggestions')
 tray.Add()
 
 tray.Add('Show ClipHistory',(*) => mGui.show())
-tray.Add('Settings' , (*) => ConfigGui.show())
-tray.default := "Settings"
+tray.Add('Preference' , (*) => ConfigGui.show())
+tray.default := 'Show ClipHistory'
 tray.ClickCount := 1 ; how many clicks (1 or 2) to trigger the default action above
 tray.Add()
 tray.AddStandard()

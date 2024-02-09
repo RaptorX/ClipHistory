@@ -57,9 +57,16 @@ limit := IniRead(script.config,'Settings','ClipLimit',4)
 ConfigGui.AddGroupBox(' xm w300 h' 40 * 1.30, 'Keep Clipboard History for Last:')
 ConfigGui.AddDropDownList( 'xp+10 yp+20 w200 Choose' limit ' vClipLimit', cliplimits).onEvent('change',eventhandler)
 ConfigGui.AddButton('x+m w70', 'Delete All').OnEvent('click',DeleteClipboardHistory)
+
+; Display on Start
+DScheck := (IniRead(script.config,'Settings','DisplayStart',1)? ' +Checked':' -Checked')
+ConfigGui.AddGroupBox(' xm w300 h' 45, 'Display on Start')
+ConfigGui.AddCheckbox( 'xp+10 yp+20 +Center vDStart ' DScheck, 'Display ClipHistory on start').onEvent('click',eventhandler)
+
+; Apply and Close
 ConfigGui.AddButton('xm' 300 -145 ' w70', 'Apply').onEvent('click',EnableNewHotkeys)
 ConfigGui.AddButton('x+m w70', 'Close').onEvent('click',(*) => ConfigGui.Hide())
-ConfigGui.Show()
+;ConfigGui.Show()
 
 
 ToggleClipWatch(*)
@@ -130,6 +137,11 @@ EnableNewHotkeys(*)
 	ConfigGui.OldCSHK .= ctrl.onoffHK
 	IniWrite(ConfigGui.OldCSHK,script.config,'Hotkeys','CStoggle')
 	Hotkey ConfigGui.OldCSHK, onofftoggle, 'on'
+
+	tray.Rename(ConfigGui.TrayClipWatch ,ConfigGui.TrayClipWatch := 'Toggle ClipWatch Press			' HKToString(ConfigGui.WatchClipHK))
+	tray.Rename(ConfigGui.TrayClipSugg  ,ConfigGui.TrayClipSugg  := 'Toggle Clip Suggestions Press	' HKToString(ConfigGui.OldShowHK))
+	tray.Rename(ConfigGui.TrayClipUI    ,ConfigGui.TrayClipUI    := 'Show ClipHistory UI Press		' HKToString(ConfigGui.OldCSHK))
+
 }
 
 
@@ -137,6 +149,8 @@ eventhandler(aCtrl,*)
 {
 	Global FontSize, MaxResults, MinChar
 	ctrl := ConfigGui.Submit(0)
+	
+	IniWrite(ctrl.Dstart,script.config,'Settings','DisplayStart')
 
 	; clip limit
 	IniWrite(ConfigGui['ClipLimit'].value,script.config,'Settings','ClipLimit')
@@ -185,4 +199,32 @@ DeleteClipboardHistory(*)
 	else
 		Notify.show('Deleted all clipboard history except the Pinned ones')
 	BuildClipLV()
+}
+
+
+HKToString(hk)
+{
+	; removed logging due to performance issues
+	; Log.Add(DEBUG_ICON_INFO, A_Now, A_ThisFunc, 'started', 'none')
+
+	if !hk
+		return
+
+	temphk := []
+
+	if InStr(hk, '#')
+		temphk.Push('Win+')
+	if InStr(hk, '^')
+		temphk.Push('Ctrl+')
+	if InStr(hk, '+')
+		temphk.Push('Shift+')
+	if InStr(hk, '!')
+		temphk.Push('Alt+')
+
+	hk := RegExReplace(hk, '[#^+!]')
+	for mod in temphk
+		fixedMods .= mod
+
+	; Log.Add(DEBUG_ICON_INFO, A_Now, A_ThisFunc, 'ended', 'none')
+	return (fixedMods ?? '') StrUpper(hk)
 }
