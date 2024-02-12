@@ -75,7 +75,7 @@ mGui.Show('w' totalWidth + 30 DSstats )
 line .= 'Toggle ClipWatch Press		' HKToString(IniRead(script.config,'Hotkeys','ClipWatchtoggle','^+s')) '`n'
 line .= 'Toggle Clip Suggestions Press	' HKToString(IniRead(script.config,'Hotkeys','CStoggle','^+a')) '`n'
 line .= 'Show ClipHistory UI Press	' HKToString(IniRead(script.config,'Hotkeys','ShowHotKey','^+Home'))
-Notify.show({HDText: 'Clip History started',BDText: line ,GenDuration:4})
+; Notify.show({HDText: 'Clip History started',BDText: line ,GenDuration:4}) ;We need a way to disable this
 
 
 

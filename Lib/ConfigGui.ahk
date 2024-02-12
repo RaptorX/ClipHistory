@@ -76,10 +76,12 @@ ToggleClipWatch(*)
 	{
 		Case 1: 
 			OnClipboardChange(WatchClipboard,1)
+			tray.check('Watch Clipboard')
 			ConfigGui['ClipWatchToggle'].value := 1
 			mGui['ClipWatchToggle'].value      := 1
 			Notify.show({BDText:'On',HDFontColor:'Green',HDText:'Storing Clips'})
 		Case 0:
+			tray.Uncheck('Watch Clipboard')
 			OnClipboardChange(WatchClipboard,0)
 			ConfigGui['ClipWatchToggle'].value := 0
 			mGui['ClipWatchToggle'].value      := 0

@@ -1,4 +1,5 @@
-﻿#Requires AutoHotkey v2.0
+﻿#SingleInstance
+#Requires AutoHotkey v2.0
 #Include <ScriptObj\scriptobj>
 #include <sift>
 #include <NotifyV2>
@@ -17,7 +18,7 @@ script := {
 	     crtdate : "",
 	     moddate : "",
 	   resfolder : A_ScriptDir "\res",
-	    iconfile : 'mmcndmgr.dll' , ;A_ScriptDir "\res\UltimateSpybg512.ico",
+	    iconfile : A_ScriptDir "\res\ClipHistory.ico",
 	      config : A_ScriptDir "\settings.ini",
 	homepagetext : "the-automator.com/ClipBox",
 	homepagelink : "the-automator.com/ClipBox?src=app",
@@ -43,18 +44,16 @@ script.Hwnd := mGui.Hwnd
 ; 	tray.check('Run with Start up')
 ;script.Autostart(autostartup+0)
 
+ConfigGui.TrayClipWatch := 'Watch Clipboard     ' HKToString(ConfigGui.WatchClipHK)
+ConfigGui.TrayClipSugg  := 'Toggle Suggestions  ' HKToString(ConfigGui.OldShowHK)
+ConfigGui.TrayClipUI    := 'Show Main GUI       ' HKToString(ConfigGui.OldCSHK)
 
-
-
-
-ConfigGui.TrayClipWatch := 'Toggle ClipWatch Press 			' HKToString(ConfigGui.WatchClipHK)
-ConfigGui.TrayClipSugg  := 'Toggle Clip Suggestions Press	' HKToString(ConfigGui.OldShowHK)
-ConfigGui.TrayClipUI    := 'Show ClipHistory UI Press		' HKToString(ConfigGui.OldCSHK)
+TraySetIcon(script.iconfile)
 
 tray := A_TrayMenu
 tray.Delete()
 tray.Add("About",(*) => Script.About())
-tray.Add("Donate",(*) => Run(script.donateLink))
+;tray.Add("Donate",(*) => Run(script.donateLink))
 tray.Add()
 
 tray.add(ConfigGui.TrayClipWatch , (*) => ConfigGui.Show())
@@ -62,7 +61,8 @@ tray.add(ConfigGui.TrayClipSugg  , (*) => ConfigGui.Show())
 tray.add(ConfigGui.TrayClipUI    , (*) => ConfigGui.Show())
 
 tray.Add()
-tray.Add('Watch Clipboard',(*) => a_now)
+tray.Add('Watch Clipboard',ToggleClipWatch)
+tray.check('Watch Clipboard')
 tray.Add('Show Suggestions',onofftoggle)
 tray.Check('Show Suggestions')
 tray.Add()
@@ -72,8 +72,12 @@ tray.Add('Preference' , (*) => ConfigGui.show())
 tray.default := 'Show ClipHistory'
 tray.ClickCount := 1 ; how many clicks (1 or 2) to trigger the default action above
 tray.Add()
-tray.AddStandard()
+tray.Add("Exit",(*) => Exit())
+;tray.AddStandard()
 
+exit(*){
+	ExitApp
+}
 
 ClipData := []
 ClipDATAFolder := A_ScriptDir '\DATA'
@@ -131,11 +135,11 @@ changeWinfocus(wParam, lParam, msg, hwnd)
 	switch msg
 	{
 		Case WM_ACTIVATE: ; activated window
-			if  WinGetStyle(main) & WS_VISIBLE
+		if  WinGetStyle(main) & WS_VISIBLE
 			&& !WinActive(main)
-			{
-				hideSuggest()
-			}
+		{
+			hideSuggest()
+		}
 		Default: return
 	}
 }
@@ -156,25 +160,25 @@ CheckPrompt(Prompt, Char)
 		hideSuggest(true)
 		return
 	}
-
+	
 	switch Char
 	{
-	case '`n',Chr(27):
+		case '`n',Chr(27):
 		hideSuggest()
-	default:
+		default:
 		if StrLen(Prompt.Input) < MinChar
 		&& WinGetStyle(main) & WS_VISIBLE = false
 		{
 			OutputDebug 'less than 3 and not visible`n'
 			return
 		}
-
+		
 		if Prompt.Input = ""
 		{
 			hideSuggest()
 			return
 		}
-
+		
 		try ; this try statement avoids catastrophic backtracking if the string is too long
 		{
 			if  !result := BuildResult()
@@ -188,7 +192,7 @@ CheckPrompt(Prompt, Char)
 			hideSuggest(false)
 			return
 		}
-
+		
 		BuildLV(Result)
 		;main.Show('NA') 
 		;if WinGetStyle(main) & WS_VISIBLE = false
@@ -264,7 +268,7 @@ ShowSuggest()
 CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 {
 	static TPM_WORKAREA := 0x10000
-
+	
 	windowRect := Buffer(16), windowSize := windowRect.ptr + 8
 	
 	; resizing window for DLLCall 
@@ -272,15 +276,15 @@ CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 	DllCall("GetClientRect", "ptr", main.hwnd, "ptr", windowRect)
 	CoordMode 'Caret', 'Screen'
 	;MouseGetPos &x, &y
-
+	
 	; ToolTip normally shows at an offset of 16,16 from the cursor.
 	anchorPt := Buffer(8)
 	NumPut "int", x+offsetx, "int", y+offsety, anchorPt
-
+	
 	; Avoid the area around the mouse pointer.
 	excludeRect := Buffer(16)
 	NumPut "int", x-offsetx, "int", y-offsety, "int", x+offsetx, "int", y+offsety, excludeRect
-
+	
 	; Windows 7 permits overlap with the taskbar, whereas Windows 10 requires the
 	; tooltip to be within the work area (WinMove can subvert that, so this is just
 	; for consistency with the normal behaviour).
@@ -291,13 +295,13 @@ CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 		"uint", VerCompare(A_OSVersion, "6.2") < 0 ? 0 : TPM_WORKAREA, ; flags
 		"ptr" , excludeRect,
 		"ptr" , outRect
-
+	
 	x := NumGet(outRect, 0, 'int')
 	y := NumGet(outRect, 4, 'int')
 	
 	OutputDebug 'corrected: ' x ' ' y '`n'
 	main.Show('NoActivate x' x ' y' y ' w' w ' h' h )
-
+	
 }
 
 
@@ -328,18 +332,18 @@ getCurrentDisplayPathByMouse()
 
 TextWidth(String,Typeface,Size)
 {
-    static hDC, hFont := 0, Extent
+	static hDC, hFont := 0, Extent
 	OutputDebug String '`n' main.MaxStr  '`n' Typeface " " Size "`n" 
-    If !hFont
-    {
-        hDC := DllCall("GetDC","UPtr",0,"UPtr")
-        Height := -DllCall("MulDiv","Int",Size,"Int",DllCall("GetDeviceCaps","UPtr",hDC,"Int",90),"Int",72)
-        hFont := DllCall("CreateFont","Int",Height,"Int",0,"Int",0,"Int",0,"Int",400,"UInt",False,"UInt",False,"UInt",False,"UInt",0,"UInt",0,"UInt",0,"UInt",0,"UInt",0,"Str",Typeface)
-        hOriginalFont := DllCall("SelectObject","UPtr",hDC,"UPtr",hFont,"UPtr")
+	If !hFont
+	{
+		hDC := DllCall("GetDC","UPtr",0,"UPtr")
+		Height := -DllCall("MulDiv","Int",Size,"Int",DllCall("GetDeviceCaps","UPtr",hDC,"Int",90),"Int",72)
+		hFont := DllCall("CreateFont","Int",Height,"Int",0,"Int",0,"Int",0,"Int",400,"UInt",False,"UInt",False,"UInt",False,"UInt",0,"UInt",0,"UInt",0,"UInt",0,"UInt",0,"Str",Typeface)
+		hOriginalFont := DllCall("SelectObject","UPtr",hDC,"UPtr",hFont,"UPtr")
 		Extent := Buffer(8)
-    }
-    DllCall("GetTextExtentPoint32","Ptr",hDC,"Str",String,"Int",StrLen(String),"Ptr",Extent)
-    Return NumGet(Extent,0,'Int')
+	}
+	DllCall("GetTextExtentPoint32","Ptr",hDC,"Str",String,"Int",StrLen(String),"Ptr",Extent)
+	Return NumGet(Extent,0,'Int')
 }
 
 ; *********************************************************************************************************************
@@ -440,9 +444,9 @@ StoreClip(str,hwnd)
 
 AddlineClipFile(clipline)
 {
-		fileobj := FileOpen(ClipPath, 'a-w','utf-8')
-		fileobj.Write('`n' clipline)
-		fileobj.Close()
+	fileobj := FileOpen(ClipPath, 'a-w','utf-8')
+	fileobj.Write('`n' clipline)
+	fileobj.Close()
 }
 
 ReWriteFilteredClipFile(clipline,DeleteAll:=false)
@@ -475,29 +479,29 @@ CheckLimit(time,ms,DeleteAll:=false)
 	switch x := cliplimits[ConfigGui['ClipLimit'].value], 0
 	{
 		Case "15 Minutes":
-			if DateDiff(A_Now, time, "Seconds") >= 15*60   ;(A_Now - data['Time']) >= 15*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 15*60   ;(A_Now - data['Time']) >= 15*60
+			return false
 		Case "30 Minutes":
-			if DateDiff(A_Now, time, "Seconds") >= 30*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 30*60
+			return false
 		Case "1 Hour":
-			if DateDiff(A_Now, time, "Seconds") >= 60*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 60*60
+			return false
 		Case "12 Hour":
-			if DateDiff(A_Now, time, "Seconds") >= 12*60*60
-				return false  
+		if DateDiff(A_Now, time, "Seconds") >= 12*60*60
+			return false  
 		Case "1 Day":
-			if DateDiff(A_Now, time, "Seconds") >= 24*60*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 24*60*60
+			return false
 		Case "1 Week":
-			if DateDiff(A_Now, time, "Seconds") >= 7*24*60*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 7*24*60*60
+			return false
 		Case "1 Month":
-			if DateDiff(A_Now, time, "Seconds") >= 30*24*60*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 30*24*60*60
+			return false
 		Case "1 Year":
-			if DateDiff(A_Now, time, "Seconds") >= 365*24*60*60
-				return false
+		if DateDiff(A_Now, time, "Seconds") >= 365*24*60*60
+			return false
 	}
 	return true
 }
