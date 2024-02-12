@@ -20,8 +20,8 @@ script := {
 	   resfolder : A_ScriptDir "\res",
 	    iconfile : A_ScriptDir "\res\ClipHistory.ico",
 	      config : A_ScriptDir "\settings.ini",
-	homepagetext : "the-automator.com/ClipBox",
-	homepagelink : "the-automator.com/ClipBox?src=app",
+	homepagetext : "the-automator.com/ClipHistory",
+	homepagelink : "the-automator.com/ClipHistory?src=app",
 	  donateLink : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6",
 }
 
