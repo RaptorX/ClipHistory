@@ -69,7 +69,15 @@ mGui.AddCheckbox('x+m w200 vClipWatchToggle +checked', 'Watch clipboard').OnEven
 mGui.UiFilter := false
 mGui.AddButton('x+m+' totalWidth -700 ' yp-7 w100', 'Preference').OnEvent('click', (*) => (mGui.Opt('+OwnDialogs'),ConfigGui.show()))
 mGui.AddButton('x+m w100', 'Close').OnEvent('click', (*) => mGui.Hide())
-mGui.Show('w' totalWidth + 30 )
+
+mGui.Show('w' totalWidth + 30 DSstats )
+
+line .= 'Toggle ClipWatch Press		' HKToString(IniRead(script.config,'Hotkeys','ClipWatchtoggle','^+s')) '`n'
+line .= 'Toggle Clip Suggestions Press	' HKToString(IniRead(script.config,'Hotkeys','CStoggle','^+a')) '`n'
+line .= 'Show ClipHistory UI Press	' HKToString(IniRead(script.config,'Hotkeys','ShowHotKey','^+Home'))
+; Notify.show({HDText: 'Clip History started',BDText: line ,GenDuration:4}) ;We need a way to disable this
+
+
 
 ApplyFilters(*) ; apply filter to suggestions
 {
