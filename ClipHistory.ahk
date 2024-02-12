@@ -12,7 +12,7 @@ Notify.Default.BDFont := 'Arial Black'
 script := {
 	        base : ScriptObj(),
 			hwnd : 0,
-	     version : "1.0.0",
+	     version : "0.2.0",
 	      author : "the-Automator",
 	       email : "joe@the-automator.com",
 	     crtdate : "",
