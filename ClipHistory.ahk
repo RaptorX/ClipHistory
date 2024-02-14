@@ -1,6 +1,23 @@
-﻿#SingleInstance
+﻿/*
+This work by the-Automator.com is licensed under CC BY 4.0
+
+Attribution — You must give appropriate credit , provide a link to the license,
+and indicate if changes were made.
+You may do so in any reasonable manner, but not in any way that suggests the licensor
+endorses you or your use.
+No additional restrictions — You may not apply legal terms or technological measures that
+legally restrict others from doing anything the license permits.
+*/
+
+#SingleInstance
 #Requires AutoHotkey v2.0
-#Include <ScriptObj\scriptobj>
+
+;@Ahk2Exe-SetVersion     0.3.0
+;@Ahk2Exe-SetMainIcon    res\ClipHistory.ico
+;@Ahk2Exe-SetProductName ClipHistory
+;@Ahk2Exe-SetDescription ClipHistory Suggestor
+
+#Include <ScriptObject\ScriptObject>
 #include <sift>
 #include <NotifyV2>
 #Include <HotKeys>
@@ -11,30 +28,32 @@ Notify.Default.BDFont := 'Arial Black'
 
 script := {
 	        base : ScriptObj(),
-			hwnd : 0,
-	     version : "0.2.0",
+	     version : '0.3.0',
 	      author : "the-Automator",
 	       email : "joe@the-automator.com",
-	     crtdate : "",
-	     moddate : "",
-	   resfolder : A_ScriptDir "\res",
-	    iconfile : A_ScriptDir "\res\ClipHistory.ico",
 	      config : A_ScriptDir "\settings.ini",
+	    iconfile : A_ScriptDir "\res\ClipHistory.ico",
+	   resfolder : A_ScriptDir "\res",
+	     crtdate : '',
+	     moddate : '',
 	homepagetext : "the-automator.com/ClipHistory",
 	homepagelink : "the-automator.com/ClipHistory?src=app",
-	  donateLink : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6",
 }
+
+script.eddID := 96962
+if !ScriptObj.GetLicense()
+	return
 
 DSstats := (IniRead(script.config,'Settings','DisplayStart',1)?'':' hide') ; hide/show on start clip history by default
 MaxResults         := 10 ;maximum number of results to display
-MinChar            := 3 ; minimer characters after suggestion triggers 
+MinChar            := 3 ; minimer characters after suggestion triggers
 OffsetX            := 8 ;offset in caret position in X axis
 OffsetY            := 16 ;offset from caret position in Y axis
 FontName           := 'Book Antiqua'
 FontSize           := 12 ; suggestion size calculated by font size and and works fine with different DPIs tested on 125% 150%
 sep                := 'Җ' ; sep symbol which is beaing use to as a separator in clip history file
 SuggestTriggerKeys := '{enter}'
-LVS_NOSCROLL       := 0x2000 
+LVS_NOSCROLL       := 0x2000
 VScroll            := 0x200000
 
 #include <gui>
@@ -99,7 +118,7 @@ LV.OnEvent('ItemSelect',SkipFirstSuggestions)
 
 main.MarginX := main.MarginY := 0
 ;LV.OnEvent('DoubleClick',CompleteWord)
-main.Show('hide') 
+main.Show('hide')
 
 Prompt := InputHook('V')
 Prompt.OnChar := CheckPrompt
@@ -148,10 +167,10 @@ changeWinfocus(wParam, lParam, msg, hwnd)
 CheckPrompt(Prompt, Char)
 {
 	static searching := false
-	static WS_VISIBLE := 0x10000000 
+	static WS_VISIBLE := 0x10000000
  	Critical 'on'
 	if winactive(mgui)
-		return 
+		return
 	; DllCall("QueryPerformanceFrequency", "Int64*", &freq := 0)
 	; DllCall("QueryPerformanceCounter", "Int64*", &CounterBefore := 0)
 	if Prompt.Input ~= '^\s'
@@ -160,7 +179,7 @@ CheckPrompt(Prompt, Char)
 		hideSuggest(true)
 		return
 	}
-	
+
 	switch Char
 	{
 		case '`n',Chr(27):
@@ -172,13 +191,13 @@ CheckPrompt(Prompt, Char)
 			OutputDebug 'less than 3 and not visible`n'
 			return
 		}
-		
+
 		if Prompt.Input = ""
 		{
 			hideSuggest()
 			return
 		}
-		
+
 		try ; this try statement avoids catastrophic backtracking if the string is too long
 		{
 			if  !result := BuildResult()
@@ -192,9 +211,9 @@ CheckPrompt(Prompt, Char)
 			hideSuggest(false)
 			return
 		}
-		
+
 		BuildLV(Result)
-		;main.Show('NA') 
+		;main.Show('NA')
 		;if WinGetStyle(main) & WS_VISIBLE = false
 		if Prompt.Input ~= '\s\s$'
 			hideSuggest(true)
@@ -237,7 +256,7 @@ BuildLV(Result)
 	}
 	LV.ModifyCol(1, 'Auto')
 	LV.Opt('+redraw')
-	return i 
+	return i
 }
 
 ShowSuggest()
@@ -268,23 +287,23 @@ ShowSuggest()
 CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 {
 	static TPM_WORKAREA := 0x10000
-	
+
 	windowRect := Buffer(16), windowSize := windowRect.ptr + 8
-	
-	; resizing window for DLLCall 
+
+	; resizing window for DLLCall
 	main.Show('hide x' x  + OffsetX ' y' y + OffsetY  ' w' w ' h' h )
 	DllCall("GetClientRect", "ptr", main.hwnd, "ptr", windowRect)
 	CoordMode 'Caret', 'Screen'
 	;MouseGetPos &x, &y
-	
+
 	; ToolTip normally shows at an offset of 16,16 from the cursor.
 	anchorPt := Buffer(8)
 	NumPut "int", x+offsetx, "int", y+offsety, anchorPt
-	
+
 	; Avoid the area around the mouse pointer.
 	excludeRect := Buffer(16)
 	NumPut "int", x-offsetx, "int", y-offsety, "int", x+offsetx, "int", y+offsety, excludeRect
-	
+
 	; Windows 7 permits overlap with the taskbar, whereas Windows 10 requires the
 	; tooltip to be within the work area (WinMove can subvert that, so this is just
 	; for consistency with the normal behaviour).
@@ -295,13 +314,13 @@ CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 		"uint", VerCompare(A_OSVersion, "6.2") < 0 ? 0 : TPM_WORKAREA, ; flags
 		"ptr" , excludeRect,
 		"ptr" , outRect
-	
+
 	x := NumGet(outRect, 0, 'int')
 	y := NumGet(outRect, 4, 'int')
-	
+
 	OutputDebug 'corrected: ' x ' ' y '`n'
 	main.Show('NoActivate x' x ' y' y ' w' w ' h' h )
-	
+
 }
 
 
@@ -333,7 +352,7 @@ getCurrentDisplayPathByMouse()
 TextWidth(String,Typeface,Size)
 {
 	static hDC, hFont := 0, Extent
-	OutputDebug String '`n' main.MaxStr  '`n' Typeface " " Size "`n" 
+	OutputDebug String '`n' main.MaxStr  '`n' Typeface " " Size "`n"
 	If !hFont
 	{
 		hDC := DllCall("GetDC","UPtr",0,"UPtr")
@@ -410,7 +429,7 @@ GetLVTime(time)
 		return 'Today ' FormatTime(time, 'hh:mm tt')
 	else if date = yesterDay
 		return 'Yesterday ' FormatTime(time, 'hh:mm tt')
-	else 
+	else
 		return FormatTime(time, 'MMMM dd')
 }
 
@@ -430,13 +449,13 @@ StoreClip(str,hwnd)
 	clip := StrReplace(str, '`r`n','`n')
 	clip := StrReplace(clip, '`n', '¶')
 	sleep 100
-	clipline := a_now sep A_MSec sep Title sep Exe sep StrLen(str) sep clip 
-	
-	if mGui.HasProp('ClipArray') 
+	clipline := a_now sep A_MSec sep Title sep Exe sep StrLen(str) sep clip
+
+	if mGui.HasProp('ClipArray')
 		ReWriteFilteredClipFile(clipline)
 	else
 		AddlineClipFile(clipline)
-	
+
 	BuildClipLV()
 }
 
@@ -460,7 +479,7 @@ ReWriteFilteredClipFile(clipline,DeleteAll:=false)
 GetClipLines(DeleteAll:=false) ; get cliplines filtered by clip time limit
 {
 	clipline := ''
-	for i, data in mGui.ClipArray 
+	for i, data in mGui.ClipArray
 	{
 		if !CheckLimit(data['Time'], data['ms'],DeleteAll)
 			continue
@@ -489,7 +508,7 @@ CheckLimit(time,ms,DeleteAll:=false)
 			return false
 		Case "12 Hour":
 		if DateDiff(A_Now, time, "Seconds") >= 12*60*60
-			return false  
+			return false
 		Case "1 Day":
 		if DateDiff(A_Now, time, "Seconds") >= 24*60*60
 			return false
