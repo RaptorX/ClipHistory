@@ -1,4 +1,4 @@
-/*
+﻿/*
 This work by the-Automator.com is licensed under CC BY 4.0
 
 Attribution — You must give appropriate credit , provide a link to the license,
@@ -39,6 +39,10 @@ script := {
 	homepagetext : "the-automator.com/ClipHistory",
 	homepagelink : "the-automator.com/ClipHistory?src=app",
 }
+
+script.eddID := 96962
+if !ScriptObj.GetLicense()
+	return
 
 DSstats := (IniRead(script.config,'Settings','DisplayStart',1)?'':' hide') ; hide/show on start clip history by default
 MaxResults         := 10 ;maximum number of results to display
