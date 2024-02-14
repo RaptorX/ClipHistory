@@ -159,11 +159,11 @@ eventhandler(aCtrl,*)
 
 	Switch(ConfigGui['Option'].value)
 	{
-		Case 1  : ConfigGui.Options := 'OC' ; FUZZY
-		Case 2  : ConfigGui.Options := 'IN'
-		Case 3  : ConfigGui.Options := 'LEFT' ;'LEFT'
-		Case 4  : ConfigGui.Options := 'RIGHT'
-	}	
+		Case 1  : ConfigGui.Options := 'oc' ; FUZZY
+		Case 2  : ConfigGui.Options := 'in'
+		Case 3  : ConfigGui.Options := 'left' ;'LEFT'
+		Case 4  : ConfigGui.Options := 'right'
+	}
 
 	Switch(ctrl.Toggle)
 	{
