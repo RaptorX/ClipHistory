@@ -12,7 +12,7 @@ legally restrict others from doing anything the license permits.
 #SingleInstance
 #Requires AutoHotkey v2.0
 
-;@Ahk2Exe-SetVersion     0.2.0
+;@Ahk2Exe-SetVersion     0.3.0
 ;@Ahk2Exe-SetMainIcon    res\ClipHistory.ico
 ;@Ahk2Exe-SetProductName ClipHistory
 ;@Ahk2Exe-SetDescription ClipHistory Suggestor
@@ -28,7 +28,7 @@ Notify.Default.BDFont := 'Arial Black'
 
 script := {
 	        base : ScriptObj(),
-	     version : '0.2.0',
+	     version : '0.3.0',
 	      author : "the-Automator",
 	       email : "joe@the-automator.com",
 	      config : A_ScriptDir "\settings.ini",
