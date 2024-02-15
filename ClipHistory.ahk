@@ -40,7 +40,7 @@ script := {
 	homepagelink : "the-automator.com/ClipHistory?src=app",
 }
 
-script.eddID := 96962
+ScriptObj.eddID := 96962
 if !ScriptObj.GetLicense()
 	return
 
