@@ -1,7 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-DSstats := (IniRead(script.config,'Settings','DisplayStart',1)?'':' hide') ; hide/show on start clip history by default
 MaxResults         := 10 ;maximum number of results to display
 MinChar            := 3 ; minimer characters after suggestion triggers
 OffsetX            := 8 ;offset in caret position in X axis
@@ -112,7 +111,7 @@ onofftoggle(*)
 			ConfigGui['toggle'].value := 0
 			tray.Uncheck('Show Suggestions')
 			Prompt.stop() ; stop input hook
-			main.hide()   ; hide suggetion
+			suggestions.hide()   ; hide suggetion
 			LV.Delete()   ; reset suggetion list
 			Notify.show({BDText:'Off',HDFontColor:'Red'})
 	}
@@ -184,7 +183,7 @@ eventhandler(aCtrl,*)
 		Case 0:
 			ConfigGui.Toggle := false
 			Prompt.stop() ; stop input hook
-			main.hide()   ; hide suggetion
+			suggestions.hide()   ; hide suggetion
 			LV.Delete()   ; reset suggetion list
 			tray.Uncheck('Show Suggestions')
 			state := 'on', color := 'Red'

@@ -1,27 +1,28 @@
 ﻿#Requires AutoHotkey v2.0
 
+DSstats := (IniRead(script.config,'Settings','DisplayStart',1)?'':' hide') ; hide/show on start clip history by default
 FontName           := 'Book Antiqua'
 FontSize           := 12 ; suggestion size calculated by font size and and works fine with different DPIs tested on 125% 150%
 
 ;************************************* suggester *************************************
 ; Listview
-main := Gui('-Caption +ToolWindow +AlwaysOnTop +LastFound')
-main.oldHwnd := 0
-main.SetFont('s' FontSize,FontName)
+suggestions := Gui('-Caption +ToolWindow +AlwaysOnTop +LastFound')
+suggestions.oldHwnd := 0
+suggestions.SetFont('s' FontSize,FontName)
 
-LV := main.AddListView('x0 y0 -HDR AltSubmit' ,['suggestion'])
+LV := suggestions.AddListView('x0 y0 -HDR AltSubmit' ,['suggestion'])
 LV.SetFont('s' FontSize)
 LV.OnEvent('ItemSelect',SkipFirstSuggestions)
 
-main.MarginX := main.MarginY := 0
+suggestions.MarginX := suggestions.MarginY := 0
 ;LV.OnEvent('DoubleClick',CompleteWord)
-main.Show('hide')
+suggestions.Show('hide')
 
 Prompt := InputHook('V')
 Prompt.OnChar := CheckPrompt
 Prompt.Start()
 
-DllCall 'RegisterShellHookWindow', 'UInt', Main.hwnd
+DllCall 'RegisterShellHookWindow', 'UInt', suggestions.hwnd
 MsgNum := DllCall('RegisterWindowMessage', 'Str','SHELLHOOK')
 OnMessage(MsgNum, changeWinfocus)
 
@@ -51,8 +52,8 @@ changeWinfocus(wParam, lParam, msg, hwnd)
 	switch msg
 	{
 		Case WM_ACTIVATE: ; activated window
-		if  WinGetStyle(main) & WS_VISIBLE
-			&& !WinActive(main)
+		if  WinGetStyle(suggestions) & WS_VISIBLE
+			&& !WinActive(suggestions)
 		{
 			hideSuggest()
 		}
@@ -83,7 +84,7 @@ CheckPrompt(Prompt, Char)
 		hideSuggest()
 		default:
 		if StrLen(Prompt.Input) < MinChar
-		&& WinGetStyle(main) & WS_VISIBLE = false
+		&& WinGetStyle(suggestions) & WS_VISIBLE = false
 		{
 			OutputDebug 'less than 3 and not visible`n'
 			return
@@ -136,17 +137,17 @@ BuildLV(Result)
 	LV.Opt('-redraw')
 	LV.Delete()
 	i := 1
-	main.MaxStrLen := 0
-	main.MaxStr := ""
+	suggestions.MaxStrLen := 0
+	suggestions.MaxStr := ""
 	LV.Add(,Prompt.input)
 	for index, str in StrSplit(Result,'`n','`r')
 	{
 		if a_index > MaxResults
 			break
-		if main.MaxStrLen < StrLen(str)
+		if suggestions.MaxStrLen < StrLen(str)
 		{
-			main.MaxStr := str
-			main.MaxStrLen := StrLen(str)
+			suggestions.MaxStr := str
+			suggestions.MaxStrLen := StrLen(str)
 		}
 		LV.Add(,StrReplace(str,'`t',' '))
 		++i
@@ -160,9 +161,9 @@ ShowSuggest()
 {
 	if Prompt.Input = ""
 		return
-	OutputDebug Prompt.Input '`n' main.MaxStr '`n'
+	OutputDebug Prompt.Input '`n' suggestions.MaxStr '`n'
 	rows := LV.GetCount()
-	width := TextWidth(main.MaxStr,FontName,FontSize) + 30
+	width := TextWidth(suggestions.MaxStr,FontName,FontSize) + 30
 	LV.Move(0,0, width > 900 ? width := 900 : width, Height := Round(rows * FontSize * ( rows>=5 ? 2.07: 3))) ; main.MaxStrLen * FontSize * 0.71 + 24
 	CoordMode 'Caret', 'Screen'
 	CaretGetPos(&x,&y)
@@ -188,8 +189,8 @@ CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 	windowRect := Buffer(16), windowSize := windowRect.ptr + 8
 
 	; resizing window for DLLCall
-	main.Show('hide x' x  + OffsetX ' y' y + OffsetY  ' w' w ' h' h )
-	DllCall("GetClientRect", "ptr", main.hwnd, "ptr", windowRect)
+	suggestions.Show('hide x' x  + OffsetX ' y' y + OffsetY  ' w' w ' h' h )
+	DllCall("GetClientRect", "ptr", suggestions.hwnd, "ptr", windowRect)
 	CoordMode 'Caret', 'Screen'
 	;MouseGetPos &x, &y
 
@@ -216,14 +217,14 @@ CorrectPos(x,y,w,h:=0,offsetx:=8,offsety:=8)
 	y := NumGet(outRect, 4, 'int')
 
 	OutputDebug 'corrected: ' x ' ' y '`n'
-	main.Show('NoActivate x' x ' y' y ' w' w ' h' h )
+	suggestions.Show('NoActivate x' x ' y' y ' w' w ' h' h )
 
 }
 
 
 hideSuggest(restartinput:=1)
 {
-	main.hide()
+	suggestions.hide()
 	LV.Delete()
 	if restartinput
 	{
@@ -249,7 +250,7 @@ getCurrentDisplayPathByMouse()
 TextWidth(String,Typeface,Size)
 {
 	static hDC, hFont := 0, Extent
-	OutputDebug String '`n' main.MaxStr  '`n' Typeface " " Size "`n"
+	OutputDebug String '`n' suggestions.MaxStr  '`n' Typeface " " Size "`n"
 	If !hFont
 	{
 		hDC := DllCall("GetDC","UPtr",0,"UPtr")

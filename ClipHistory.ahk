@@ -17,14 +17,6 @@ legally restrict others from doing anything the license permits.
 ;@Ahk2Exe-SetProductName ClipHistory
 ;@Ahk2Exe-SetDescription ClipHistory Suggestor
 
-#include <sift>
-#include <NotifyV2>
-
-Notify.Default.HDText := "ClipHistory Suggestor"
-Notify.Default.BDFontSize := 18
-Notify.Default.BDFont := 'Arial Black'
-
-#Include <main>
 #Include <ScriptObject\ScriptObject>
 script := {
 	        base : ScriptObj(),
@@ -39,13 +31,21 @@ script := {
 	homepagetext : "the-automator.com/ClipHistory",
 	homepagelink : "the-automator.com/ClipHistory?src=app",
 }
+#Include <GUISuggestions>
+#include <sift>
+#include <NotifyV2>
+
+Notify.Default.HDText := "ClipHistory Suggestor"
+Notify.Default.BDFontSize := 18
+Notify.Default.BDFont := 'Arial Black'
+
 
 ScriptObj.eddID := 96962
 if !ScriptObj.GetLicense()
 	return
 
 #include <gui>
-#include <ConfigGui>
+#include <GUIConfig>
 #Include <HotKeys>
 
 script.Hwnd := mGui.Hwnd
