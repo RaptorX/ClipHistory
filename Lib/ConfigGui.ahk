@@ -1,6 +1,15 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+DSstats := (IniRead(script.config,'Settings','DisplayStart',1)?'':' hide') ; hide/show on start clip history by default
+MaxResults         := 10 ;maximum number of results to display
+MinChar            := 3 ; minimer characters after suggestion triggers
+OffsetX            := 8 ;offset in caret position in X axis
+OffsetY            := 16 ;offset from caret position in Y axis
+sep                := 'Җ' ; sep symbol which is beaing use to as a separator in clip history file
+SuggestTriggerKeys := '{enter}'
+LVS_NOSCROLL       := 0x2000
+VScroll            := 0x200000
 
 ConfigGui := Gui()
 ConfigGui.Options := 'oc' ; filter default option
