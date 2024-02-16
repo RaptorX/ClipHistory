@@ -13,7 +13,8 @@ up::
 && prompt.Input
 ~backspace::CheckPrompt(Prompt, 'BS')
 
-
+~*Lbutton::
+~*Rbutton::
 ~^BackSpace::
 ~*Left::
 ~*Right::
@@ -39,11 +40,9 @@ Tab::
 	
 	clipsave := A_Clipboard
 	A_Clipboard := ''
-	; if !ClipWait(1)
-	; 	msgbox 'unable to empty clicpboard'
+
 
 	A_Clipboard := InputNewLInes(LV.GetText(row,1)) . ' ' 
-	; ToolTip Text
 	if !ClipWait(1)
 		msgbox 'unable to set clicpboard'
 
