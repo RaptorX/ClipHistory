@@ -1,19 +1,20 @@
-﻿#HotIf !WinActive(main)
+﻿#HotIf !WinActive(suggestions)
 && prompt.Input
 && LV.GetCount()
 Down::
 up::
 {
 	LV.Modify(2,'+select +focus')
-	main.show()
-	main.show()
+	suggestions.show()
+	suggestions.show()
 }
 
-#HotIf !WinActive(main)
+#HotIf !WinActive(suggestions)
 && prompt.Input
 ~backspace::CheckPrompt(Prompt, 'BS')
 
-
+~*Lbutton::
+~*Rbutton::
 ~^BackSpace::
 ~*Left::
 ~*Right::
@@ -25,7 +26,7 @@ up::
 	hideSuggest()
 }
 
-#HotIf WinActive(main) ;LV.Visible
+#HotIf WinActive(suggestions) ;LV.Visible
 Enter::
 Tab::
 {
@@ -39,15 +40,13 @@ Tab::
 	
 	clipsave := A_Clipboard
 	A_Clipboard := ''
-	; if !ClipWait(1)
-	; 	msgbox 'unable to empty clicpboard'
+
 
 	A_Clipboard := InputNewLInes(LV.GetText(row,1)) . ' ' 
-	; ToolTip Text
 	if !ClipWait(1)
 		msgbox 'unable to set clicpboard'
 
-	main.hide()
+	suggestions.hide()
 	LV.Delete()
 	if !row
 	{

@@ -1,6 +1,14 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+MaxResults         := 10 ;maximum number of results to display
+MinChar            := 3 ; minimer characters after suggestion triggers
+OffsetX            := 8 ;offset in caret position in X axis
+OffsetY            := 16 ;offset from caret position in Y axis
+sep                := 'Җ' ; sep symbol which is beaing use to as a separator in clip history file
+SuggestTriggerKeys := '{enter}'
+LVS_NOSCROLL       := 0x2000
+VScroll            := 0x200000
 
 ConfigGui := Gui()
 ConfigGui.Options := 'oc' ; filter default option
@@ -103,7 +111,7 @@ onofftoggle(*)
 			ConfigGui['toggle'].value := 0
 			tray.Uncheck('Show Suggestions')
 			Prompt.stop() ; stop input hook
-			main.hide()   ; hide suggetion
+			suggestions.hide()   ; hide suggetion
 			LV.Delete()   ; reset suggetion list
 			Notify.show({BDText:'Off',HDFontColor:'Red'})
 	}
@@ -175,7 +183,7 @@ eventhandler(aCtrl,*)
 		Case 0:
 			ConfigGui.Toggle := false
 			Prompt.stop() ; stop input hook
-			main.hide()   ; hide suggetion
+			suggestions.hide()   ; hide suggetion
 			LV.Delete()   ; reset suggetion list
 			tray.Uncheck('Show Suggestions')
 			state := 'on', color := 'Red'
