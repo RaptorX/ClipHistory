@@ -12,7 +12,7 @@ legally restrict others from doing anything the license permits.
 #SingleInstance
 #Requires AutoHotkey v2.0
 
-;@Ahk2Exe-SetVersion     0.3.0
+;@Ahk2Exe-SetVersion     0.3.3
 ;@Ahk2Exe-SetMainIcon    res\ClipHistory.ico
 ;@Ahk2Exe-SetProductName ClipHistory
 ;@Ahk2Exe-SetDescription ClipHistory Suggestor
@@ -20,14 +20,14 @@ legally restrict others from doing anything the license permits.
 #Include <ScriptObject\ScriptObject>
 script := {
 	        base : ScriptObj(),
-	     version : '0.3.0',
+	     version : '0.3.3',
 	      author : "the-Automator",
 	       email : "joe@the-automator.com",
 	      config : A_ScriptDir "\settings.ini",
 	    iconfile : A_ScriptDir "\res\ClipHistory.ico",
 	   resfolder : A_ScriptDir "\res",
-	     crtdate : '',
-	     moddate : '',
+	     crtdate : 'February 07, 2024',
+	     moddate : 'February 19, 2024',
 	homepagetext : "the-automator.com/ClipHistory",
 	homepagelink : "the-automator.com/ClipHistory?src=app",
 }
